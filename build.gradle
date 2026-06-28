@@ -48,7 +48,5 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-tasks.named('processTestAot') {
-    enabled = false
-}
+
 
