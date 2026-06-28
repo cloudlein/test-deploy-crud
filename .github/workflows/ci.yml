@@ -1,0 +1,32 @@
+name: GraalVM CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, dev ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup GraalVM JDK
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21' # or '25' if available in GitHub Actions runner
+          distribution: 'graalvm'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          cache: 'gradle'
+
+      - name: Make Gradle Wrapper Executable
+        run: chmod +x gradlew
+
+      - name: Run Unit Tests
+        run: ./gradlew test --no-daemon
+
+      - name: Build GraalVM Native Image
+        run: ./gradlew nativeCompile --no-daemon
