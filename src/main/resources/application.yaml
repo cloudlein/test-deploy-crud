@@ -2,9 +2,14 @@ spring:
   application:
     name: test-deploy-crud
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:postgres}:5432/${POSTGRES_DB}
+    url: jdbc:postgresql://${POSTGRES_HOST:postgres}:${POSTGRES_PORT:5432}/${POSTGRES_DB}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
+
+springdoc:
+  querydsl:
+    enabled: false
+

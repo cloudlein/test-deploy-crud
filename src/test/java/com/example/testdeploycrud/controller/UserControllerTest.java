@@ -33,12 +33,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Unit tests untuk UserController.
- *
- * Menggunakan MockMvc untuk simulasi HTTP requests TANPA menjalankan server.
- * UserService di-mock sehingga kita hanya test controller logic.
- */
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
 
@@ -54,7 +48,6 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        // Setup MockMvc secara standalone (tanpa Spring context)
         mockMvc = MockMvcBuilders.standaloneSetup(userController)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
@@ -70,9 +63,6 @@ class UserControllerTest {
                 .build();
     }
 
-    // =========================================================================
-    // POST /api/v1/users — CREATE
-    // =========================================================================
     @Nested
     @DisplayName("POST /api/v1/users")
     class CreateUserEndpoint {
@@ -122,7 +112,6 @@ class UserControllerTest {
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.status").value(400));
 
-            // Service TIDAK boleh dipanggil jika validasi gagal
             verify(userService, never()).createUser(any());
         }
 
@@ -207,9 +196,6 @@ class UserControllerTest {
         }
     }
 
-    // =========================================================================
-    // PATCH /api/v1/users/{userId} — UPDATE
-    // =========================================================================
     @Nested
     @DisplayName("PATCH /api/v1/users/{userId}")
     class UpdateUserEndpoint {
@@ -266,9 +252,6 @@ class UserControllerTest {
         }
     }
 
-    // =========================================================================
-    // DELETE /api/v1/users/{userId} — DELETE
-    // =========================================================================
     @Nested
     @DisplayName("DELETE /api/v1/users/{userId}")
     class DeleteUserEndpoint {
@@ -299,9 +282,6 @@ class UserControllerTest {
         }
     }
 
-    // =========================================================================
-    // GET /api/v1/users/{userId} — GET ONE
-    // =========================================================================
     @Nested
     @DisplayName("GET /api/v1/users/{userId}")
     class GetOneUserEndpoint {
@@ -334,9 +314,6 @@ class UserControllerTest {
         }
     }
 
-    // =========================================================================
-    // GET /api/v1/users — GET ALL (Paginated)
-    // =========================================================================
     @Nested
     @DisplayName("GET /api/v1/users")
     class GetAllUsersEndpoint {

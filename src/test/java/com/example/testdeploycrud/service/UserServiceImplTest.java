@@ -30,12 +30,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-/**
- * Unit tests untuk UserServiceImpl.
- *
- * Menggunakan Mockito untuk mock UserRepository,
- * sehingga test ini TIDAK butuh database dan berjalan sangat cepat.
- */
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
@@ -51,7 +45,6 @@ class UserServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        // Data sample yang akan dipakai berulang di setiap test
         sampleUser = UserEntity.builder()
                 .id(1L)
                 .username("johndoe")
@@ -74,9 +67,6 @@ class UserServiceImplTest {
                 .build();
     }
 
-    // =========================================================================
-    // CREATE USER TESTS
-    // =========================================================================
     @Nested
     @DisplayName("createUser()")
     class CreateUserTests {
@@ -84,22 +74,18 @@ class UserServiceImplTest {
         @Test
         @DisplayName("Harus berhasil membuat user baru")
         void createUser_Success() {
-            // Arrange: setup mock behavior
             when(userRepository.existsByUsername("johndoe")).thenReturn(false);
             when(userRepository.existsByEmail("john@example.com")).thenReturn(false);
             when(userRepository.save(any(UserEntity.class))).thenReturn(sampleUser);
 
-            // Act: panggil method yang ditest
             UserResponse result = userService.createUser(createRequest);
 
-            // Assert: verifikasi hasilnya
             assertNotNull(result);
             assertEquals(1L, result.getId());
             assertEquals("johndoe", result.getUsername());
             assertEquals("john@example.com", result.getEmail());
             assertEquals("John Doe", result.getFullName());
 
-            // Verify: pastikan repository dipanggil dengan benar
             verify(userRepository).existsByUsername("johndoe");
             verify(userRepository).existsByEmail("john@example.com");
             verify(userRepository).save(any(UserEntity.class));
@@ -108,10 +94,8 @@ class UserServiceImplTest {
         @Test
         @DisplayName("Harus throw BadRequestException jika username sudah dipakai")
         void createUser_DuplicateUsername_ThrowsException() {
-            // Arrange
             when(userRepository.existsByUsername("johndoe")).thenReturn(true);
 
-            // Act & Assert
             BadRequestException exception = assertThrows(
                     BadRequestException.class,
                     () -> userService.createUser(createRequest)
@@ -119,18 +103,15 @@ class UserServiceImplTest {
 
             assertEquals("Username is already in use", exception.getMessage());
 
-            // Verify: save TIDAK boleh dipanggil
             verify(userRepository, never()).save(any(UserEntity.class));
         }
 
         @Test
         @DisplayName("Harus throw BadRequestException jika email sudah dipakai")
         void createUser_DuplicateEmail_ThrowsException() {
-            // Arrange
             when(userRepository.existsByUsername("johndoe")).thenReturn(false);
             when(userRepository.existsByEmail("john@example.com")).thenReturn(true);
 
-            // Act & Assert
             BadRequestException exception = assertThrows(
                     BadRequestException.class,
                     () -> userService.createUser(createRequest)
@@ -141,9 +122,6 @@ class UserServiceImplTest {
         }
     }
 
-    // =========================================================================
-    // UPDATE USER TESTS
-    // =========================================================================
     @Nested
     @DisplayName("updateUser()")
     class UpdateUserTests {
@@ -151,7 +129,6 @@ class UserServiceImplTest {
         @Test
         @DisplayName("Harus berhasil update semua field")
         void updateUser_AllFields_Success() {
-            // Arrange
             UserEntity updatedUser = UserEntity.builder()
                     .id(1L)
                     .username("janedoe")
@@ -166,10 +143,8 @@ class UserServiceImplTest {
             when(userRepository.existsByEmail("jane@example.com")).thenReturn(false);
             when(userRepository.save(any(UserEntity.class))).thenReturn(updatedUser);
 
-            // Act
             UserResponse result = userService.updateUser(updateRequest, 1L);
 
-            // Assert
             assertNotNull(result);
             assertEquals("janedoe", result.getUsername());
             assertEquals("jane@example.com", result.getEmail());
@@ -181,7 +156,6 @@ class UserServiceImplTest {
         @Test
         @DisplayName("Harus berhasil update hanya username")
         void updateUser_OnlyUsername_Success() {
-            // Arrange: hanya isi username, email dan fullName null
             UserUpdateRequest partialUpdate = UserUpdateRequest.builder()
                     .username("newusername")
                     .build();
@@ -190,10 +164,8 @@ class UserServiceImplTest {
             when(userRepository.existsByUsername("newusername")).thenReturn(false);
             when(userRepository.save(any(UserEntity.class))).thenReturn(sampleUser);
 
-            // Act
             userService.updateUser(partialUpdate, 1L);
 
-            // Assert: pastikan hanya username yang di-set
             verify(userRepository).existsByUsername("newusername");
             verify(userRepository, never()).existsByEmail(anyString());
             verify(userRepository).save(any(UserEntity.class));
@@ -228,7 +200,6 @@ class UserServiceImplTest {
 
             userService.updateUser(partialUpdate, 1L);
 
-            // Tidak ada pengecekan existsByUsername/existsByEmail
             verify(userRepository, never()).existsByUsername(anyString());
             verify(userRepository, never()).existsByEmail(anyString());
         }
@@ -264,7 +235,6 @@ class UserServiceImplTest {
         @Test
         @DisplayName("Harus throw BadRequestException jika email baru sudah dipakai")
         void updateUser_DuplicateEmail_ThrowsException() {
-            // Arrange: username ok, tapi email sudah ada
             UserUpdateRequest emailUpdate = UserUpdateRequest.builder()
                     .email("taken@example.com")
                     .build();
@@ -281,9 +251,6 @@ class UserServiceImplTest {
         }
     }
 
-    // =========================================================================
-    // DELETE USER TESTS
-    // =========================================================================
     @Nested
     @DisplayName("deleteUser()")
     class DeleteUserTests {
@@ -293,10 +260,8 @@ class UserServiceImplTest {
         void deleteUser_Success() {
             when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
 
-            // Act: tidak throw exception = sukses
             assertDoesNotThrow(() -> userService.deleteUser(1L));
 
-            // Verify: pastikan delete dipanggil
             verify(userRepository).delete(sampleUser);
         }
 
@@ -314,9 +279,6 @@ class UserServiceImplTest {
         }
     }
 
-    // =========================================================================
-    // GET ONE USER TESTS
-    // =========================================================================
     @Nested
     @DisplayName("getOneUser()")
     class GetOneUserTests {
@@ -351,9 +313,6 @@ class UserServiceImplTest {
         }
     }
 
-    // =========================================================================
-    // GET ALL USERS TESTS
-    // =========================================================================
     @Nested
     @DisplayName("getAllUsers()")
     class GetAllUsersTests {
@@ -361,7 +320,6 @@ class UserServiceImplTest {
         @Test
         @DisplayName("Harus berhasil mengambil semua user dengan pagination")
         void getAllUsers_Success() {
-            // Arrange: buat page berisi 2 user
             UserEntity user2 = UserEntity.builder()
                     .id(2L)
                     .username("janedoe")
@@ -377,10 +335,8 @@ class UserServiceImplTest {
 
             when(userRepository.findAll(pageable)).thenReturn(userPage);
 
-            // Act
             Page<UserResponse> result = userService.getAllUsers(pageable);
 
-            // Assert
             assertNotNull(result);
             assertEquals(2, result.getTotalElements());
             assertEquals(1, result.getTotalPages());
