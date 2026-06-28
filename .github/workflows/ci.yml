@@ -17,7 +17,7 @@ jobs:
       - name: Setup GraalVM JDK
         uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '21' # or '25' if available in GitHub Actions runner
+          java-version: '25' # Matches Java Language Version 25 configured in build.gradle
           distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           cache: 'gradle'
